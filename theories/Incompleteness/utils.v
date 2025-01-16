@@ -178,3 +178,39 @@ Proof.
   - cbn. intros x. destruct totalise as [b Hb]. unfold reflects.
     destruct b; firstorder congruence.
 Qed.
+
+
+(** More vector Lemmas. The code using them should be refactored to use the vector Lemmas proved at
+    the beginning of this file. *)
+Lemma zero_vector_is_nil {X: Type} (v: Vector.t X 0):
+    [] = v.
+Proof.
+    apply case0. easy.
+Qed. 
+
+Lemma un_vector_inv {X: Type} n (v: Vector.t X (S n)):
+    exists x v', v = x::v'.
+Proof.
+    specialize (caseS (fun n vn => exists x v', vn = Vector.cons X x n (v'))) as Ht.
+    apply Ht. eauto.
+Qed.
+
+Lemma bin_vector_inv {X: Type} n (v: Vector.t X (S (S n))):
+    exists x y v', v = x::y::v'.
+Proof.
+    assert (exists x v0, v = x::v0) as (x0 & v_one & Hx0).
+    specialize (caseS (fun n vn => exists x v', vn = Vector.cons X x n (v'))) as Ht.
+    apply Ht. eauto.
+    assert (exists x v0, v_one = x::v0) as (x1 & v_nil & Hx1).
+    specialize (caseS (fun n vn => exists x v', vn = Vector.cons X x n (v'))) as Ht.
+    apply Ht. eauto.
+    exists x0, x1, v_nil. congruence.
+Qed.
+
+Lemma vector_inv_two_elems {X: Type} (v: Vector.t X 2):
+    exists x y, v = x::y::[].
+Proof.
+    destruct (@bin_vector_inv _ _ v) as (x & y & v' & H).
+    exists x, y. rewrite <- (zero_vector_is_nil v') in H.
+    congruence.
+Qed.
